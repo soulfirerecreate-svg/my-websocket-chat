@@ -2,34 +2,119 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Live Chatroom</title>
+    <title>Live Cloud Chatroom</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
             background-image: url('https://unsplash.com');
-            background-size: cover; background-position: center; background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.45); z-index: 1; /* Smooth dark matte tint overlay */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45); 
+            z-index: 1;
         }
         #chat-container {
-            width: 100%; max-width: 420px; height: 90vh; background: white; border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 2;
+            width: 100%;
+            max-width: 420px;
+            height: 85vh; 
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 2; 
         }
-        #chat-header { background-color: #075e54; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        #chat-header {
+            background-color: #075e54;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
         #chat-header h3 { margin: 0; font-size: 16px; }
-        .header-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        #message-display { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; background-color: #efeae2; }
-        .custom-modal { position: absolute; top: -100%; left: 0; width: 100%; background: #f0f2f5; padding: 20px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: top 0.3s ease; z-index: 20; border-bottom: 2px solid #ddd; }
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .header-btn:hover { background: rgba(255,255,255,0.3); }
+        #message-display {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+            background-color: #efeae2;
+        }
+        .custom-modal {
+            position: absolute;
+            top: -100%; 
+            left: 0;
+            width: 100%;
+            background: #f0f2f5;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: top 0.3s ease;
+            z-index: 20;
+            border-bottom: 2px solid #ddd;
+        }
         .custom-modal.active { top: 50px; }
         .modal-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #333; }
-        .modal-input { width: 65%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 14px; }
-        .modal-btn { padding: 8px 12px; border: none; background: #00a884; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .modal-input {
+            width: 65%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+        .modal-btn {
+            padding: 8px 12px;
+            border: none;
+            background: #00a884;
+            color: white;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
         .modal-close { background: #727272; margin-left: 5px; }
         .message-row { display: flex; width: 100%; }
-        .bubble { max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
         .bubble-meta { font-size: 10px; font-weight: bold; margin-bottom: 3px; color: #128c7e; }
         .bubble-time { font-size: 9px; color: #727272; align-self: flex-end; margin-top: 4px; }
         .row-left { justify-content: flex-start; }
@@ -40,6 +125,7 @@
         #chat-form { display: flex; padding: 10px; background: #f0f2f5; border-top: 1px solid #ddd; z-index: 10; }
         #user-input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 14px; }
         #chat-form button { background-color: #00a884; color: white; border: none; padding: 0 18px; margin-left: 8px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        #chat-form button:hover { background-color: #008f72; }
     </style>
 </head>
 <body>
@@ -63,13 +149,7 @@
             <button type="submit" class="modal-btn" style="background:#b32424;">Wipe</button>
             <button type="button" class="modal-btn modal-close" onclick="closeModals()">Cancel</button>
         </form>
-        <div id="message-display">
-            <div class="message-row row-left">
-                <div class="bubble bubble-left" id="status-bubble" style="background-color: #ffe6e6; color: #b32424;">
-                    ⏳ Connecting to chat stream... Please hold.
-                </div>
-            </div>
-        </div>
+        <div id="message-display"></div>
         <form id="chat-form" action="javascript:void(0);" onsubmit="processSubmit()">
             <input type="text" id="user-input" placeholder="Type a message..." required autocomplete="off">
             <button type="submit">Send</button>
@@ -78,49 +158,56 @@
     <script>
         const messageDisplay = document.getElementById('message-display');
         const userInput = document.getElementById('user-input');
-        const statusBubble = document.getElementById('status-bubble');
         const myUserId = 'ID_' + Math.floor(Math.random() * 10000);
-        let myUsername = 'Guest_' + Math.floor(Math.random() * 900);
-        
-        // 📍 REPLACE "YOUR_RENDER_SUBDOMAIN_HERE" WITH YOUR REALSURFACE PROJECT NAME
-        const socket = new WebSocket('wss://my-websocket-chat.onrender.com');
+        let myUsername = localStorage.getItem('chat_username') || 'Guest_' + Math.floor(Math.random() * 900);
 
-        socket.addEventListener('open', function() {
-            if (statusBubble) {
-                statusBubble.innerText = "✅ Stream established cleanly!";
-                statusBubble.style.backgroundColor = "#d9fdd3"; statusBubble.style.color = "#075e54";
-                setTimeout(() => { statusBubble.remove(); }, 3000);
-            }
-        });
+        const socket = new WebSocket('wss://://onrender.com');
+
         socket.addEventListener('message', function(event) {
             const package = JSON.parse(event.data);
             if (package.type === 'history') {
                 messageDisplay.innerHTML = ''; 
                 package.data.forEach(msg => { appendBubble(msg.text, msg.senderId === myUserId, msg.username, msg.time); });
             } else if (package.type === 'message') {
-                if (messageDisplay.innerText.includes("Connecting to chat stream")) { messageDisplay.innerHTML = ''; }
                 appendBubble(package.data.text, package.data.senderId === myUserId, package.data.username, package.data.time);
-            } else if (package.type === 'wipe') { messageDisplay.innerHTML = ''; }
+            } else if (package.type === 'wipe') {
+                messageDisplay.innerHTML = '';
+            }
         });
+
         function processSubmit() {
-            const messageText = userInput.value.trim(); if (messageText === '') return;
+            const messageText = userInput.value.trim();
+            if (messageText === '') return;
             const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const payload = { type: 'message', senderId: myUserId, username: myUsername, text: messageText, time: currentTime };
-            if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(payload)); userInput.value = ''; }
+            if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(payload)); }
+            userInput.value = ''; 
         }
+
         function appendBubble(text, isMe, username, time) {
-            const row = document.createElement('div'); row.classList.add('message-row', isMe ? 'row-right' : 'row-left');
-            const bubble = document.createElement('div'); bubble.classList.add('bubble', isMe ? 'bubble-right' : 'bubble-left');
-            const meta = document.createElement('div'); meta.classList.add('bubble-meta'); meta.textContent = isMe ? `${username} (You)` : username;
+            const row = document.createElement('div');
+            row.classList.add('message-row', isMe ? 'row-right' : 'row-left');
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble', isMe ? 'bubble-right' : 'bubble-left');
+            const meta = document.createElement('div');
+            meta.classList.add('bubble-meta');
+            meta.textContent = isMe ? `${username} (You)` : username;
             const textNode = document.createTextNode(text);
-            const timeNode = document.createElement('div'); timeNode.classList.add('bubble-time'); timeNode.textContent = time || '--:--';
-            bubble.appendChild(meta); bubble.appendChild(textNode); bubble.appendChild(timeNode); row.appendChild(bubble);
-            messageDisplay.appendChild(row); messageDisplay.scrollTop = messageDisplay.scrollHeight;
+            const timeNode = document.createElement('div');
+            timeNode.classList.add('bubble-time');
+            timeNode.textContent = time || '--:--';
+            bubble.appendChild(meta);
+            bubble.appendChild(textNode);
+            bubble.appendChild(timeNode);
+            row.appendChild(bubble);
+            messageDisplay.appendChild(row);
+            messageDisplay.scrollTop = messageDisplay.scrollHeight;
         }
+
         function openUsernameModal() { closeModals(); document.getElementById('username-field').value = myUsername; document.getElementById('username-modal').classList.add('active'); }
         function openWipeModal() { closeModals(); document.getElementById('password-field').value = ''; document.getElementById('wipe-modal').classList.add('active'); }
         function closeModals() { document.getElementById('username-modal').classList.remove('active'); document.getElementById('wipe-modal').classList.remove('active'); }
-        function saveUsername() { const inputName = document.getElementById('username-field').value.trim(); if (inputName !== "") { myUsername = inputName.substring(0, 20); } closeModals(); }
+        function saveUsername() { const inputName = document.getElementById('username-field').value.trim(); if (inputName !== "") { myUsername = inputName.substring(0, 20); localStorage.setItem('chat_username', myUsername); } closeModals(); }
         function saveWipe() { const inputPass = document.getElementById('password-field').value; if (!inputPass) return; const wipePayload = { type: 'wipe', adminSecret: inputPass }; if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(wipePayload)); } closeModals(); }
     </script>
 </body>
