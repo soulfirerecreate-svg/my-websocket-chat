@@ -161,7 +161,8 @@
         const myUserId = 'ID_' + Math.floor(Math.random() * 10000);
         let myUsername = localStorage.getItem('chat_username') || 'Guest_' + Math.floor(Math.random() * 900);
 
-        const socket = new WebSocket('wss://://onrender.com');
+        // 📍 FIXED SECURE PIPELINE CONNECTION ROUTE (Your project name is perfectly locked in)
+        const socket = new WebSocket('wss://my-websocket-chat.onrender.com');
 
         socket.addEventListener('message', function(event) {
             const package = JSON.parse(event.data);
