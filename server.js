@@ -2,30 +2,27 @@ const { createServer } = require('http');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8080;
-const ADMIN_PASSWORD = "MySecretAdminPassword123"; 
+const ADMIN_PASSWORD = "admin"; // Simple password for testing
 
-// Create standard HTTP Web Server
+// 1. Create a basic HTTP Server to handle the live wake-up ping
 const server = createServer((req, res) => {
     if (req.url === '/ping') {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
         res.end('OK');
     } else {
         res.writeHead(404); res.end();
     }
 });
 
-// 📍 PORT FIX: Explicitly bind the WebSocket listener to the root path of the active web server
-const wss = new WebSocketServer({ noServer: true });
+// 2. Attach a WebSocket server directly to it
+const wss = new WebSocketServer({ server });
+const clients = new Set();
 let historyLog = [];
-// Intercept incoming network handshakes and feed them directly to the WebSocket channel
-server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
-    });
-});
 
 wss.on('connection', (ws) => {
-    clientsAdd(ws);
+    clients.add(ws);
+    
+    // Send existing chat history to the newly connected user instantly
     if (historyLog.length > 0) {
         ws.send(JSON.stringify({ type: 'history', data: historyLog }));
     }
@@ -33,37 +30,33 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         try {
             const incoming = JSON.parse(data.toString());
+
             if (incoming.type === 'wipe') {
                 if (incoming.adminSecret === ADMIN_PASSWORD) {
                     historyLog = [];
-                    broadcastToAll({ type: 'wipe' });
+                    broadcast({ type: 'wipe' });
                 }
             } 
             else if (incoming.type === 'message') {
                 historyLog.push(incoming);
-                if (historyLog.length > 50) historyLog.shift();
-                broadcastToAll({ type: 'message', data: incoming });
+                if (historyLog.length > 30) historyLog.shift(); // Keep history light
+                broadcast({ type: 'message', data: incoming });
             }
         } catch (e) {
-            console.log("Error processing package: ", e);
+            console.log("Error handling packet:", e);
         }
     });
 
-    ws.on('close', () => { clientsDelete(ws); });
+    ws.on('close', () => { clients.delete(ws); });
 });
 
-const activeClients = new Set();
-function clientsAdd(ws) { activeClients.add(ws); }
-function clientsDelete(ws) { activeClients.delete(ws); }
-
-function broadcastToAll(obj) {
-    for (let client of activeClients) {
-        if (client.readyState === 1) {
-            client.send(JSON.stringify(obj));
-        }
+function broadcast(obj) {
+    const packet = JSON.stringify(obj);
+    for (let client of clients) {
+        if (client.readyState === 1) { client.send(packet); }
     }
 }
 
 server.listen(PORT, () => {
-    console.log(`WebSocket network bridge completely operational on port ${PORT}`);
+    console.log(`Fresh server listening cleanly on port ${PORT}`);
 });
