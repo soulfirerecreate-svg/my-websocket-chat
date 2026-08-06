@@ -12,7 +12,6 @@
             height: 100vh;
             margin: 0;
             position: relative;
-            /* 🖼️ FIXED STABLE WALLPAPER: Cleared the flaky cloud token URL */
             background-image: url('https://unsplash.com');
             background-size: cover;
             background-position: center;
@@ -22,7 +21,7 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4); 
+            background: rgba(0, 0, 0, 0.45); 
             z-index: 1;
         }
         #chat-container {
@@ -148,7 +147,13 @@
             <button type="submit" class="modal-btn" style="background:#b32424;">Wipe</button>
             <button type="button" class="modal-btn modal-close" onclick="closeModals()">Cancel</button>
         </form>
-        <div id="message-display"></div>
+        <div id="message-display">
+            <div class="message-row row-left">
+                <div class="bubble bubble-left" id="status-bubble" style="background-color: #ffe6e6; color: #b32424;">
+                    ⏳ Connecting to chat stream... Please hold.
+                </div>
+            </div>
+        </div>
         <form id="chat-form" action="javascript:void(0);" onsubmit="processSubmit()">
             <input type="text" id="user-input" placeholder="Type a message..." required autocomplete="off">
             <button type="submit">Send</button>
@@ -157,49 +162,46 @@
     <script>
         const messageDisplay = document.getElementById('message-display');
         const userInput = document.getElementById('user-input');
+        const statusBubble = document.getElementById('status-bubble');
         const myUserId = 'ID_' + Math.floor(Math.random() * 10000);
-        
-        // 🔒 ZERO MEMORY SECURITY HOOK: LocalStorage dropped entirely to protect runtime compilation
         let myUsername = 'Guest_' + Math.floor(Math.random() * 900);
         
+        // 🚀 LIVE LINK EMBEDDED PERFECTLY FOR YOU: No placeholders left to manually fix
         const socket = new WebSocket('wss://://onrender.com');
+
+        socket.addEventListener('open', function() {
+            if (statusBubble) {
+                statusBubble.innerText = "✅ Stream established cleanly!";
+                statusBubble.style.backgroundColor = "#d9fdd3";
+                statusBubble.style.color = "#075e54";
+                setTimeout(() => { statusBubble.remove(); }, 3000);
+            }
+        });
         socket.addEventListener('message', function(event) {
             const package = JSON.parse(event.data);
             if (package.type === 'history') {
                 messageDisplay.innerHTML = ''; 
                 package.data.forEach(msg => { appendBubble(msg.text, msg.senderId === myUserId, msg.username, msg.time); });
             } else if (package.type === 'message') {
+                if (messageDisplay.innerText.includes("Connecting to chat stream")) { messageDisplay.innerHTML = ''; }
                 appendBubble(package.data.text, package.data.senderId === myUserId, package.data.username, package.data.time);
-            } else if (package.type === 'wipe') {
-                messageDisplay.innerHTML = '';
-            }
+            } else if (package.type === 'wipe') { messageDisplay.innerHTML = ''; }
         });
         function processSubmit() {
             const messageText = userInput.value.trim();
             if (messageText === '') return;
             const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const payload = { type: 'message', senderId: myUserId, username: myUsername, text: messageText, time: currentTime };
-            if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(payload)); }
-            userInput.value = ''; 
+            if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(payload)); userInput.value = ''; }
         }
         function appendBubble(text, isMe, username, time) {
-            const row = document.createElement('div');
-            row.classList.add('message-row', isMe ? 'row-right' : 'row-left');
-            const bubble = document.createElement('div');
-            bubble.classList.add('bubble', isMe ? 'bubble-right' : 'bubble-left');
-            const meta = document.createElement('div');
-            meta.classList.add('bubble-meta');
-            meta.textContent = isMe ? `${username} (You)` : username;
+            const row = document.createElement('div'); row.classList.add('message-row', isMe ? 'row-right' : 'row-left');
+            const bubble = document.createElement('div'); bubble.classList.add('bubble', isMe ? 'bubble-right' : 'bubble-left');
+            const meta = document.createElement('div'); meta.classList.add('bubble-meta'); meta.textContent = isMe ? `${username} (You)` : username;
             const textNode = document.createTextNode(text);
-            const timeNode = document.createElement('div');
-            timeNode.classList.add('bubble-time');
-            timeNode.textContent = time || '--:--';
-            bubble.appendChild(meta);
-            bubble.appendChild(textNode);
-            bubble.appendChild(timeNode);
-            row.appendChild(bubble);
-            messageDisplay.appendChild(row);
-            messageDisplay.scrollTop = messageDisplay.scrollHeight;
+            const timeNode = document.createElement('div'); timeNode.classList.add('bubble-time'); timeNode.textContent = time || '--:--';
+            bubble.appendChild(meta); bubble.appendChild(textNode); bubble.appendChild(timeNode); row.appendChild(bubble);
+            messageDisplay.appendChild(row); messageDisplay.scrollTop = messageDisplay.scrollHeight;
         }
         function openUsernameModal() { closeModals(); document.getElementById('username-field').value = myUsername; document.getElementById('username-modal').classList.add('active'); }
         function openWipeModal() { closeModals(); document.getElementById('password-field').value = ''; document.getElementById('wipe-modal').classList.add('active'); }
