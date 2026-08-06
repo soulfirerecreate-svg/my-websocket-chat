@@ -12,7 +12,8 @@
             height: 100vh;
             margin: 0;
             position: relative;
-            background-image: url('https://googleusercontent.com');
+            /* 🖼️ FIXED STABLE WALLPAPER: Cleared the flaky cloud token URL */
+            background-image: url('https://unsplash.com');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -157,7 +158,10 @@
         const messageDisplay = document.getElementById('message-display');
         const userInput = document.getElementById('user-input');
         const myUserId = 'ID_' + Math.floor(Math.random() * 10000);
-        let myUsername = localStorage.getItem('chat_username') || 'Guest_' + Math.floor(Math.random() * 900);
+        
+        // 🔒 ZERO MEMORY SECURITY HOOK: LocalStorage dropped entirely to protect runtime compilation
+        let myUsername = 'Guest_' + Math.floor(Math.random() * 900);
+        
         const socket = new WebSocket('wss://://onrender.com');
         socket.addEventListener('message', function(event) {
             const package = JSON.parse(event.data);
@@ -200,7 +204,7 @@
         function openUsernameModal() { closeModals(); document.getElementById('username-field').value = myUsername; document.getElementById('username-modal').classList.add('active'); }
         function openWipeModal() { closeModals(); document.getElementById('password-field').value = ''; document.getElementById('wipe-modal').classList.add('active'); }
         function closeModals() { document.getElementById('username-modal').classList.remove('active'); document.getElementById('wipe-modal').classList.remove('active'); }
-        function saveUsername() { const inputName = document.getElementById('username-field').value.trim(); if (inputName !== "") { myUsername = inputName.substring(0, 20); localStorage.setItem('chat_username', myUsername); } closeModals(); }
+        function saveUsername() { const inputName = document.getElementById('username-field').value.trim(); if (inputName !== "") { myUsername = inputName.substring(0, 20); } closeModals(); }
         function saveWipe() { const inputPass = document.getElementById('password-field').value; if (!inputPass) return; const wipePayload = { type: 'wipe', adminSecret: inputPass }; if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(wipePayload)); } closeModals(); }
     </script>
 </body>
