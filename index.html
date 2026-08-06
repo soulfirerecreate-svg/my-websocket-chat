@@ -11,11 +11,18 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            /* Safe backup gradient matching your aesthetic */
-            background: linear-gradient(135deg, #075e54 0%, #b32424 50%, #d9fdd3 100%);
+            position: relative;
+            background-image: url('https://googleusercontent.com');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4); 
+            z-index: 1;
         }
         #chat-container {
             width: 100%;
@@ -23,11 +30,12 @@
             height: 90vh; 
             background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            z-index: 2; 
         }
         #chat-header {
             background-color: #075e54;
@@ -115,10 +123,10 @@
         #chat-form { display: flex; padding: 10px; background: #f0f2f5; border-top: 1px solid #ddd; z-index: 10; }
         #user-input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 14px; }
         #chat-form button { background-color: #00a884; color: white; border: none; padding: 0 18px; margin-left: 8px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        #chat-form button:hover { background-color: #008f72; }
     </style>
 </head>
 <body>
-
     <div id="chat-container">
         <div id="chat-header">
             <h3>Live Cloud Chat</h3>
@@ -127,37 +135,30 @@
                 <button class="header-btn" style="background:#b32424;" onclick="openWipeModal()">Wipe</button>
             </div>
         </div>
-
         <form id="username-modal" class="custom-modal" action="javascript:void(0);" onsubmit="saveUsername()">
             <div class="modal-title">Change Display Name:</div>
-            <input type="text" id="username-field" class="modal-input" placeholder="Enter name...">
+            <input type="text" id="username-field" class="modal-input" placeholder="Enter name..." autocomplete="off">
             <button type="submit" class="modal-btn">Save</button>
             <button type="button" class="modal-btn modal-close" onclick="closeModals()">Cancel</button>
         </form>
-
         <form id="wipe-modal" class="custom-modal" action="javascript:void(0);" onsubmit="saveWipe()">
             <div class="modal-title" style="color:#b32424;">Admin Password Verification:</div>
-            <input type="password" id="password-field" class="modal-input" placeholder="Enter code...">
+            <input type="password" id="password-field" class="modal-input" placeholder="Enter code..." autocomplete="off">
             <button type="submit" class="modal-btn" style="background:#b32424;">Wipe</button>
             <button type="button" class="modal-btn modal-close" onclick="closeModals()">Cancel</button>
         </form>
-
         <div id="message-display"></div>
-
         <form id="chat-form" action="javascript:void(0);" onsubmit="processSubmit()">
             <input type="text" id="user-input" placeholder="Type a message..." required autocomplete="off">
             <button type="submit">Send</button>
         </form>
     </div>
-
     <script>
         const messageDisplay = document.getElementById('message-display');
         const userInput = document.getElementById('user-input');
         const myUserId = 'ID_' + Math.floor(Math.random() * 10000);
         let myUsername = localStorage.getItem('chat_username') || 'Guest_' + Math.floor(Math.random() * 900);
-
         const socket = new WebSocket('wss://://onrender.com');
-
         socket.addEventListener('message', function(event) {
             const package = JSON.parse(event.data);
             if (package.type === 'history') {
@@ -169,7 +170,6 @@
                 messageDisplay.innerHTML = '';
             }
         });
-
         function processSubmit() {
             const messageText = userInput.value.trim();
             if (messageText === '') return;
@@ -178,7 +178,6 @@
             if (socket.readyState === WebSocket.OPEN) { socket.send(JSON.stringify(payload)); }
             userInput.value = ''; 
         }
-
         function appendBubble(text, isMe, username, time) {
             const row = document.createElement('div');
             row.classList.add('message-row', isMe ? 'row-right' : 'row-left');
@@ -198,7 +197,6 @@
             messageDisplay.appendChild(row);
             messageDisplay.scrollTop = messageDisplay.scrollHeight;
         }
-
         function openUsernameModal() { closeModals(); document.getElementById('username-field').value = myUsername; document.getElementById('username-modal').classList.add('active'); }
         function openWipeModal() { closeModals(); document.getElementById('password-field').value = ''; document.getElementById('wipe-modal').classList.add('active'); }
         function closeModals() { document.getElementById('username-modal').classList.remove('active'); document.getElementById('wipe-modal').classList.remove('active'); }
